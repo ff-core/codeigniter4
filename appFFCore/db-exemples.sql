@@ -64,9 +64,11 @@ CREATE TABLE `escritorios` (
   `updated_at` datetime DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `escritorios` */
+
+insert  into `escritorios`(`id`,`cidade`,`telefone`,`endereco`,`created_at`,`updated_at`,`deleted_at`) values (2,'ribeirao','16991838523','xxxxx','2021-01-13 08:47:33','2021-01-13 08:50:21','2021-01-13 08:50:21'),(3,'ribeirao','16991838523','xxxxx','2021-01-13 11:46:09','2021-01-13 12:12:34','2021-01-13 12:12:34'),(4,'Ribeirão Preto','+5516991838523','Rua Álvares Cabral','2021-01-13 11:59:46','2021-01-13 12:14:26','2021-01-13 12:14:26'),(5,'ribeirao','16991838523','xxxxx','2021-01-13 12:15:25','2021-01-13 12:15:44','2021-01-13 12:15:44'),(6,'Ribeirão Preto','+5516991838523','Rua Álvares Cabral','2021-01-13 13:06:40','2021-01-13 13:31:20','2021-01-13 13:31:20'),(7,'Ribeirão Preto','+5516991838523','Rua Álvares Cabral','2021-01-13 13:51:26','2021-01-13 13:52:29','2021-01-13 13:52:29'),(8,'16','+5516991838523','xxxxx','2021-01-13 13:55:01','2021-01-13 13:56:05','2021-01-13 13:56:05'),(9,'ribeirao','16991838523','xxxxx','2021-01-14 05:29:13','2021-01-14 05:29:33','2021-01-14 05:29:33'),(10,'ribeirao preto','16991838523','xxxxx','2021-01-14 05:33:30','2021-01-14 05:50:39','2021-01-14 05:50:39'),(11,'Ribeirão Preto','+5555991838523','Rua Álvares Cabral','2021-01-14 05:43:00','2021-01-14 05:50:43','2021-01-14 05:50:43'),(12,'Ribeirão Preto','+5555991838523','Rua Álvares Cabral','2021-01-14 05:43:48','2021-01-14 05:50:45','2021-01-14 05:50:45'),(13,'Ribeirão Preto','+5516991838523','Rua Álvares Cabral','2021-01-14 05:43:55','2021-01-14 05:50:48','2021-01-14 05:50:48'),(14,'Ribeirão Preto','+5516991838523','Rua Álvares Cabral','2021-01-14 05:48:08','2021-01-14 05:50:59','2021-01-14 05:50:59'),(15,'ribeirao','16991838523','xxxxx','2021-01-14 05:48:22','2021-01-14 05:51:02','2021-01-14 05:51:02'),(16,'Ribeirão Preto','+5516991838523','Rua Álvares Cabral','2021-01-14 05:49:14','2021-01-14 05:51:05','2021-01-14 05:51:05'),(17,'ribeirao','+5516999999999','xxxxx','2021-01-14 05:50:15','2021-01-14 05:51:08','2021-01-14 05:51:08'),(18,'PONTAL','+5516991838523','Rua Álvares Cabral','2021-01-14 08:48:31','2021-01-14 08:50:09',NULL);
 
 /*Table structure for table `filme` */
 
@@ -103,6 +105,23 @@ CREATE TABLE `filme_atores` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `filme_atores` */
+
+/*Table structure for table `log` */
+
+DROP TABLE IF EXISTS `log`;
+
+CREATE TABLE `log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tabela` varchar(255) NOT NULL,
+  `evento` enum('insert','update','delete') NOT NULL,
+  `values` varchar(4000) DEFAULT NULL,
+  `chave` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4;
+
+/*Data for the table `log` */
+
+insert  into `log`(`id`,`tabela`,`evento`,`values`,`chave`) values (19,'escritorios','insert','Array\n(\n    [action] => Add\n    [id] => \n    [cidade] => RIBEIRãO PRETO\n    [telefone] => +5516991838523\n    [endereco] => Rua Álvares Cabral\n)\n',18),(20,'escritorios','update','Array\n(\n    [action] => Edit\n    [id] => 18\n    [cidade] => pontal\n    [telefone] => +5516991838523\n    [endereco] => Rua Álvares Cabral\n)\n',18),(21,'escritorios','update','Array\n(\n    [action] => Edit\n    [id] => 18\n    [cidade] => PONTAL\n    [telefone] => +5516991838523\n    [endereco] => Rua Álvares Cabral\n)\n',18);
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
