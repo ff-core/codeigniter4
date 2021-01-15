@@ -6,6 +6,8 @@ use App\Libraries\GrudComponent\Controlador;
 class Exemples extends BaseController
 {
 
+	private $db;
+
 	public function index()
 	{
 		return view('welcome_message');
@@ -54,6 +56,12 @@ class Exemples extends BaseController
 		$Ct->fieldNameDefaultValue(['pe_id_empresa' => '1' , 'pe_id_usuario' => '1']);
 		$Ct->where(['pe_id' => '1']);*/	
 		
+		$Ct->callbackBeforeInsert(array($this, 'beforeInsertEscritorio'));
+		$Ct->callbackBeforeUpdate(array($this, 'beforeUpdateEscritorio'));
+		$Ct->callbackAfterInsert(array($this, 'logInsertAfterEscritorio'));
+		$Ct->callbackAfterUpdate(array($this, 'logUpdateAfterEscritorio'));
+		$Ct->callbackAfterDelete(array($this, 'logDeleteAfterEscritorio'));
+
 		return $Ct->show();
 	}
 
@@ -240,5 +248,61 @@ class Exemples extends BaseController
 		$Ct->addReferencesKey('id_atores', 'atores', 'id', 'nome', []);
 		
 		return $Ct->show();
+	}
+
+	public function beforeInsertEscritorio($post_array){
+		$post_array['cidade'] = strtoupper($post_array['cidade']);
+		return $post_array;
+	}
+
+	public function beforeUpdateEscritorio($post_array){
+		$post_array['cidade'] = strtoupper($post_array['cidade']);
+		return $post_array;
+	}
+
+	public function logInsertAfterEscritorio($post_array, $primarykey){
+		$this->db = \Config\Database::connect();
+
+		$values = print_r($post_array, true);
+		$data = [
+			'tabela' => 'escritorios',
+			'evento' => 'insert',
+			'values' => $values,
+			'chave' => $primarykey
+		];
+
+		$this->db->table('log')->insert($data);
+
+		return true;
+	}
+
+	public function logUpdateAfterEscritorio($post_array, $primarykey){
+		$this->db = \Config\Database::connect();
+		
+		$values = print_r($post_array, true);
+		$data = [
+			'tabela' => 'escritorios',
+			'evento' => 'update',
+			'values' => $values,
+			'chave' => $primarykey
+		];
+
+		$this->db->table('log')->insert($data);
+
+		return true;
+	}
+
+	public function logDeleteAfterEscritorio($primarykey){
+		$this->db = \Config\Database::connect();
+
+		$data = [
+			'tabela' => 'escritorios',
+			'evento' => 'delete',
+			'chave' => $primarykey
+		];
+
+		$this->db->table('log')->insert($data);
+
+		return true;
 	}
 }

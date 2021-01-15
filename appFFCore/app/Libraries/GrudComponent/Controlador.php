@@ -44,6 +44,14 @@ class Controlador extends Controller
 
     protected $_addReferencesKey = [];
 
+    protected $_callback_before_insert = null;
+    protected $_callback_before_update = null;
+    protected $_callback_before_delete = null;
+
+    protected $_callback_after_insert = null;
+    protected $_callback_after_update = null;
+    protected $_callback_after_delete = null;
+
     public function __construct($owner)
     {
         $request = \Config\Services::request();
@@ -164,6 +172,48 @@ class Controlador extends Controller
         return $this;
     }
 
+    public function callbackAfterDelete($callback)
+	{
+        $this->_callback_after_delete = $callback;
+
+		return $this;
+    }
+    
+    public function callbackAfterInsert($callback)
+	{
+        $this->_callback_after_insert = $callback;
+
+		return $this;
+    }
+    
+    public function callbackAfterUpdate($callback)
+	{
+        $this->_callback_after_update = $callback;
+
+		return $this;
+    }
+    
+    public function callbackBeforeDelete($callback)
+	{
+        $this->_callback_before_delete = $callback;
+
+		return $this;
+    }
+    
+    public function callbackBeforeInsert($callback)
+	{
+        $this->_callback_before_insert = $callback;
+
+		return $this;
+    }
+    
+    public function callbackBeforeUpdate($callback)
+	{
+        $this->_callback_before_update = $callback;
+
+		return $this;
+    }
+    
     public function show($data = [], $view = 'cadastro')
     {
         $this->data['titulo'] = $this->titulo;
@@ -231,51 +281,73 @@ class Controlador extends Controller
                 //echo $model->factory->primaryKey;
                 //echo json_encode($this->_owner->request->getPost());
                 
-                if ($this->_owner->request->getPost('action') == 'Add'){
-                    if ($model->insert($this->_owner->request->getPost()) === false){
-                        $json = [
-                            'status' => 'false',
-                            'message' => 'Falha na tentativa de inserir um novo registro.',
-                            'errors' => $model->errors()
-                        ];
-                        echo json_encode($json);
-                    } else {
+                $myPost = $this->_owner->request->getPost();
+                
+                if ($myPost['action'] == 'Add'){
+                    
+                    if($this->_callback_before_insert !== null)
+                        $myPost = call_user_func($this->_callback_before_insert, $myPost);
+
+                    $id_insert = $model->insert($myPost);
+                    if ($id_insert !== false){
+                        if($this->_callback_after_insert !== null)
+                            call_user_func_array($this->_callback_after_insert, array($myPost, $id_insert));
+
                         echo json_encode([
                             'status' => 'true',
                             'message' => 'Registro inserido com sucesso!']);
+
+                    } else {
+                        echo json_encode([
+                            'status' => 'false',
+                            'message' => 'Falha na tentativa de inserir um novo registro.',
+                            'errors' => $model->errors()
+                        ]);
                     }
                 }
                 
-                if ($this->_owner->request->getPost('action') == 'Edit'){
-                    if ($model->update($this->_owner->request->getPost($model->factory->primaryKey), $this->_owner->request->getPost())  === false){
-                        $json = [
-                            'status' => 'false',
-                            'message' => 'Falha na tentativa de alterar um registro.',
-                            'errors' => $model->errors()
-                        ];
-                        echo json_encode($json);
-                    } else {
+                if ($myPost['action'] == 'Edit'){
+                    
+                    if($this->_callback_before_update !== null)
+                        $myPost = call_user_func_array($this->_callback_before_update, array($myPost, $myPost[$model->factory->primaryKey]));
+
+                    if ($model->update($myPost[$model->factory->primaryKey], $myPost) !== false){
+                        if($this->_callback_after_update !== null)
+                            call_user_func_array($this->_callback_after_update, array($myPost, $myPost[$model->factory->primaryKey]));
+
                         echo json_encode([
                             'status' => 'true',
                             'message' => 'Registro alterado com sucesso!']);
+                    } else {
+                        echo json_encode([
+                            'status' => 'false',
+                            'message' => 'Falha na tentativa de alterar um registro.',
+                            'errors' => $model->errors()
+                        ]);
                     }
                 }
 
-                if ($this->_owner->request->getPost('action') == 'Delete'){
-                    $model->delete($this->_owner->request->getPost($model->factory->primaryKey));
+                if ($myPost['action'] == 'Delete'){
                     
+                    if($this->_callback_before_delete !== null)
+                        call_user_func($this->_callback_before_delete, $myPost[$model->factory->primaryKey]);
+
+                    $model->delete($myPost[$model->factory->primaryKey]);
+                    if($this->_callback_after_delete !== null)
+                        call_user_func($this->_callback_after_delete, $myPost[$model->factory->primaryKey]);
+
                     echo json_encode([
                         'status' => 'true',
                         'message' => 'Registro foi deletado com sucesso!']);
                     
                 }
 
-                if ($this->_owner->request->getPost('action') == 'Get'){
-                    $data = $model->find($this->_owner->request->getPost('id'));
+                if ($myPost['action'] == 'Get'){
+                    $data = $model->find($myPost['id']);
                     echo json_encode($data);
                 }
 
-                if ($this->_owner->request->getPost('action') == 'GetAll'){
+                if ($myPost['action'] == 'GetAll'){
                     $gride->where($this->_where);
                     $dados = $gride->getDadosGrid();
                     $total = count($dados);
